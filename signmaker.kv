@@ -1,0 +1,32 @@
+<TextWidget>:            
+    FloatLayout:
+        id: display
+                                                               
+        Scatter:
+            pos: root.width/4, root.height/3
+            size_hint: None, None
+            size: sign_text.size
+
+
+            Label:
+                id: sign_text
+                center: self.center
+                text: root.display_text
+                font_name: "NanumGothic.ttf"
+                font_size: root.font_size
+                color: root.text_color
+                size: self.texture_size
+
+                
+        Button:
+            id: popup
+            text: "+"
+            background_color: 0,0,0,1
+            font_size: root.height / 10
+            color: 1,1,1,.25
+            size_hint: None,None
+            height: ((root.height / 10) + 10)
+            width: ((root.height / 10) + 10)
+            on_press: root.text_popup()
+            pos: root.width-((root.height / 10) + 10), root.height-((root.height / 10) + 10)
+            
