@@ -159,7 +159,6 @@ class TextWidget(FloatLayout):
         btn2.bind(on_press=color_presets)
         
         btn3 = Button(text='Colors',font_size=self.ui_font_size)
-#        btn3.bind(on_press=flash_button)
         btn3.bind(on_press=color_button)
         
         btn4 = Button(text='<<',size_hint=(.5,1),font_size=self.ui_font_size)
@@ -183,9 +182,7 @@ class TextWidget(FloatLayout):
                                             title_size=self.ui_font_size)
         if p.content is not box:
             p.content = box
-        #p.bind(on_dismiss=Keyboard.release)
         p.open()
-        #keyboard.release_all_keyboards    
 
     # color picker popup
     def color_picker(self, *args):
