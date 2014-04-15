@@ -1,24 +1,33 @@
+__version__ = '1.4'
+
+import kivy
+kivy.require('1.7.2')
+
+'''
+# hard setting the width and height for testing use only
+from kivy.config import Config
+Config.set('graphics', 'width', '540')
+Config.set('graphics', 'height', '960')
+'''
+
 from kivy.app import App
 from kivy.core.window import Window
-from kivy.uix.widget import Widget
-from kivy.event import EventDispatcher
-from kivy.uix.scatter import Scatter
-from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.colorpicker import ColorPicker
 from kivy.uix.popup import Popup
-from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
+from kivy.properties import ListProperty, NumericProperty, StringProperty, ObjectProperty
 
-###############################################################################
-"""
-Sign Maker - Version 1.3
+
+'''
+
+Sign Maker - Version 1.4
 Copyright (C) 2014 Kris Shamloo
 
 A Mercury Labs application.
-Special thanks to the Kivy development team.
+Special thanks to the Kivy team.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,190 +42,180 @@ Special thanks to the Kivy development team.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+'''
 
-"""
-###############################################################################
 
-colorcounter = 1
-fontcounter = 3
-                 
-# primary application widget                
+# reading the saved message
+f = open('message.txt')
+message = f.read()
+f.close()
+
 class TextWidget(FloatLayout):
 
-    text_color = ListProperty([1,1,1,1])
-    text_background_color = ListProperty([1,1,1,1])
-    display_text = StringProperty("Hello")
-    font_size = NumericProperty(150)
-    ui_font_size = NumericProperty(Window.width/20)
-    btn1_label = StringProperty("Large")
-    btn2_label = StringProperty("White")
-    settings_popup = ObjectProperty(None, allownone=True)
+    text_color = ListProperty ([[1,1,1,1],
+                                [.95,.25,.37,1],
+                                [.37,.95,.25,1],
+                                [.25,.37,.95,1]])
+                                
+    color_labels = ListProperty (["White",
+                                  "Red",
+                                  "Green",
+                                  "Blue"])
+                                
+    save_labels = ListProperty (["Save your message","Reset to saved message"])
+    
+    font_size = ListProperty([Window.width/20, Window.width/4])
+                        
+    display_text = StringProperty(str(message))
+    display_color = ListProperty([1,1,1,1])
+    display_pos = ListProperty([Window.width/10,Window.height/10])
 
-   
-    # initialize the canvas
+    settings_popup = ObjectProperty(None, allownone=True)
+    
     def __init__(self, **kwargs):
         super(TextWidget,self).__init__(**kwargs)
-    
-      
-    # text input popup
-    def text_popup(self, *args):
+
+    def popup(self, *args):
         
-        # updates the display text
+        # links the contents of the popup and the display text
         def on_text(instance, value):
             self.display_text = value
-        
-        # cycles through 4 preset font sizes
-        def size_button(instance):
-            global fontcounter
 
-            if fontcounter == 0:
-                self.font_size = 35 #small
-                self.btn1_label = "Small"
-                btn1.text=(self.btn1_label)
-                fontcounter += 1
-            
-            elif fontcounter == 1:
-                self.font_size = 80 #medium
-                self.btn1_label = "Medium"
-                btn1.text=(self.btn1_label)
-                fontcounter += 1
-                
-            elif fontcounter == 2:
-                self.font_size = 150 #large
-                self.btn1_label = "Large"
-                btn1.text=(self.btn1_label)
-                fontcounter += 1
-                
-            elif fontcounter == 3:
-                self.font_size = 250 #huge
-                self.btn1_label = "Huge"
-                btn1.text=(self.btn1_label)
-                fontcounter = 0
+        # testing function to make sure callbacks are working properly
+        def button_callback(instance):
+            print("You called?", instance)
         
-            else:
-                fontcounter = 0
-        
-        # cycles through 4 preset colors
-        def color_presets(instance):
-            global colorcounter
-            
-            if colorcounter == 0:
-                self.text_color = [1,1,1,1] #white
-                self.btn2_label="White"
-                btn2.text=(self.btn2_label)
-                colorcounter += 1
-            
-            elif colorcounter == 1:
-                self.text_color = [.95,.25,.37,1] #red
-                self.btn2_label = "Red"
-                btn2.text=(self.btn2_label)
-                colorcounter += 1
-            
-            elif colorcounter == 2:
-                self.text_color = [.37,.95,.25,1] #green
-                self.btn2_label = "Green"
-                btn2.text=(self.btn2_label)
-                colorcounter += 1
-                
-            elif colorcounter == 3:
-                self.text_color = [.25,.37,.95,1] #blue
-                self.btn2_label = "Blue"
-                btn2.text=(self.btn2_label)
-                colorcounter = 0
-                
-            else:
-                colorcounter = 0
+        # links the color of the display text to the color of the button
+        def color_change(instance):
+            self.display_color = instance.background_color
 
-
-        # opens a color selection popup
-        def color_button(instance):
-            self.color_picker()
+        # saves the current message to message.txt
+        def save_message(instance):
+            print("We are saving:", t.text)
+            f = open('message.txt', 'w')
+            f.write(t.text)
+            f.close()
+            
+        # resets to center and to saved message
+        def reset_message(instance):
+            print("We are resetting!")
+            self.display_pos = [Window.width/10,Window.height/10]
+            f = open('message.txt')
+            self.display_text = str(f.read())
+            f.close()
+            
         
-        # does a backspace on the text        
-        def backspace(instance):
+        # creates and opens the save menu popup
+        def save_callback(instance):
+        
+            grid = GridLayout(rows=2)
+            
+            # save button
+            btn1 = Button(text=self.save_labels[0],
+                          font_size=self.font_size[0])
+            btn1.bind(on_press=save_message)
+            grid.add_widget(btn1)
+            
+            # reset button
+            btn2 = Button(text=self.save_labels[1],
+                          font_size=self.font_size[0])
+            btn2.bind(on_press=reset_message)
+            grid.add_widget(btn2)
+            
+            # build the popup    
+            p = Popup(content=grid, title='Save or reset your message.',
+                      size_hint=(.85,.4),pos_hint={'top':.95},
+                      title_size=self.font_size[0])
+                      
+            p.open()       
+                     
+        # creates and opens the color selection popup
+        def color_callback(instance):
+            
+            grid = GridLayout(cols=2)
+            
+            for i in range (len(self.text_color)):
+                button = Button(text=self.color_labels[i],
+                                color=self.text_color[i],
+                                background_color=self.text_color[i],
+                                background_down = 'buttondown.png',
+                                background_normal = 'buttonnormal.png',
+                                border = [32,32,32,32],
+                                font_size=self.font_size[0])
+                                
+                button.bind(on_press=color_change)
+                grid.add_widget(button)
+                
+            p = Popup(content=grid, title='Change your color.',
+                      size_hint=(.85,.4),pos_hint={'top':.95},
+                      title_size=self.font_size[0])
+                      
+            p.open()
+        
+        # backspace button callback
+        def backspace_callback(instance):
             t.do_backspace()
-                
-        # building the all important popup
-        p = self.settings_popup
-        
-        # popup root widget
+            
+        # popup contents are being created bellow, starting from the bottom up              
         box = BoxLayout(orientation='vertical')
-        
-        # popup text input, child of box
+        btnbox = BoxLayout(orientation='horizontal', size_hint=(1,.33))
+
+        # text input, sends its contents to on_text()  
         t = TextInput(text=self.display_text,
                       background_color=[.7,.7,.7,1],
-                      font_size=self.ui_font_size,
-                      font_name="NanumGothic.ttf")
+                      font_size=self.font_size[0])
         t.bind(text=on_text)
-        
-        # this BoxLayout holds the buttons, child of box
-        b = BoxLayout(orientation='horizontal',size_hint=(1,.33))
-
-        btn1 = Button(text=self.btn1_label,font_size=self.ui_font_size)
-        btn1.bind(on_press=size_button)
-        
-        btn2 = Button(text=self.btn2_label,font_size=self.ui_font_size)
-        btn2.bind(on_press=color_presets)
-        
-        btn3 = Button(text='Colors',font_size=self.ui_font_size)
-        btn3.bind(on_press=color_button)
-        
-        btn4 = Button(text='<<',size_hint=(.5,1),font_size=self.ui_font_size)
-        btn4.bind(on_press=backspace)
-        
-        # adding the buttons to our BoxLayout b, children of b
-        b.add_widget(btn1)
-        b.add_widget(btn2)
-        b.add_widget(btn3)
-        b.add_widget(btn4)
-
-        # adding t and b to our BoxLayout box, children of box
         box.add_widget(t)
-        box.add_widget(b)
+        
+        # save button
+        btn1 = Button(text="Save", font_size=self.font_size[0])
+        btn1.bind(on_press=save_callback)
+        btnbox.add_widget(btn1)
 
+        # color button, opens up a new popup for colors
+        btn2 = Button(text="Color", font_size=self.font_size[0])
+        btn2.bind(on_press=color_callback)
+        btnbox.add_widget(btn2)
+
+        # backspace button, deletes a character from the text input
+        btn3 = Button(text="<<", font_size=self.font_size[0])
+        btn3.bind(on_press=backspace_callback)
+        btnbox.add_widget(btn3)
+
+        box.add_widget(btnbox)
+
+        # linking p and the settings_popop property
+        p = self.settings_popup
+        
+        # checks if the popup exists, if not, creates it
         if p is None:
             self.settings_popup = p = Popup(content=box,
                                             title='Change your message.',
                                             size_hint=(.85,.4),
                                             pos_hint={'top':.95},
-                                            title_size=self.ui_font_size)
+                                            title_size=self.font_size[0])
+        
+        # checks if the popup was created correctly
         if p.content is not box:
             p.content = box
+        
+        # opens the popup
         p.open()
 
-    # color picker popup
-    def color_picker(self, *args):
-        
-        def on_color(instance, value):
-            self.text_color = value
-        clr=ColorPicker(font_size=self.ui_font_size)
-        
-        p = Popup(title='Change your color.',
-        content=clr,
-        size_hint=(.9,.6),
-        pos_hint={'top':.9},
-        title_size=self.ui_font_size)
-        
-        clr.bind(color=on_color)
-        p.open()   
 
-        
-        
-
-# application name and root framework
+# application name        
 class SignMaker(App):
-    #opens up the popup when the settings button is press
-    def open_settings(self, *largs):
-        print("settings!")
-        self.root.text_popup()
 
-    # note self.root, this allows us to access the popup function in the line
-    # above this one with self.root.text_popup()
+    # calls the popup function when the settings button is pressed
+    def open_settings(self, *largs):
+        self.root.popup()
+
+    # builds and assigns TextWidget as the root widget
     def build(self):
         self.root = TextWidget()
         return self.root
 
-# giddyup                    
+
+# giddyup
 if __name__ == "__main__":
     SignMaker().run()
-
