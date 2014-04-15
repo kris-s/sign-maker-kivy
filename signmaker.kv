@@ -1,32 +1,31 @@
-<TextWidget>:            
+#:kivy 1.7.2
+
+<TextWidget>:
     FloatLayout:
         id: display
-                                                               
+
         Scatter:
-            pos: root.width/4, root.height/3
+            pos: root.display_pos[0], root.display_pos[1]
             size_hint: None, None
             size: sign_text.size
-
+            on_pos: root.display_pos = self.pos
 
             Label:
                 id: sign_text
                 center: self.center
                 text: root.display_text
-                font_name: "NanumGothic.ttf"
-                font_size: root.font_size
-                color: root.text_color
+                font_size: root.font_size[1]
                 size: self.texture_size
-
-                
+                color: root.display_color
+                            
         Button:
             id: popup
             text: "+"
-            background_color: 0,0,0,1
+            background_color: 0,0,0,0
             font_size: root.height / 10
-            color: 1,1,1,.25
-            size_hint: None,None
+            color: .5, .5, .5, .5
+            size_hint: None, None
             height: ((root.height / 10) + 10)
             width: ((root.height / 10) + 10)
-            on_press: root.text_popup()
+            on_press: root.popup()
             pos: root.width-((root.height / 10) + 10), root.height-((root.height / 10) + 10)
-            
