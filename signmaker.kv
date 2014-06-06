@@ -1,4 +1,4 @@
-#:kivy 1.7.2
+#:kivy 1.8.0
 
 <TextWidget>:
     FloatLayout:
@@ -13,7 +13,7 @@
             Label:
                 id: sign_text
                 center: self.center
-                text: root.display_text
+                text: unicode(root.display_text)
                 font_size: root.font_size[1]
                 size: self.texture_size
                 color: root.display_color
